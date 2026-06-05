@@ -10,3 +10,4 @@ Jorge Vargas	978912345	jorge.vargas@gmail.com
 Camila Herrera|	989123456 |	camila.herrera@gmail.com
 Pedro Salazar | 901234567 | pedro.salazar@gmail.com
 Fernanda Ruiz | 904567891 | fernanda.ruiz@gmail.com
+Antony Vasquez | 981263857 | tony.vasquez@gmail.com
