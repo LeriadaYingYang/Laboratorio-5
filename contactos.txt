@@ -1,5 +1,2 @@
-Maria,123456789,maria@gmail.com
-Jose,789456123,jos@gmail.com
-Maria,123456789,maria@gamil.com 
-Jose,123789456,jos@gmail.com
-Maria,123456789,maria@gamil
+Maria Perez,963147852,maria@gmail.com
+Luis,987412563,luis@gmail.com
