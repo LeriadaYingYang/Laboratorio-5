@@ -1,9 +1,8 @@
-import pickle
-import os
+ARCHIVO = "contactos.txt"
+ARCHIVO_BINARIO = "contactos.dat"
 
-ARCHIVO = "contactos.txt"#archivo donde se almacenan los contactos
-
-def ingresar_nombre():#solicitar y validar nombre
+#solicitar y validar nombre
+def ingresar_nombre():
     while True:
         nombre = input("Nombre completo: ").strip()
         if nombre:
@@ -13,9 +12,9 @@ def ingresar_nombre():#solicitar y validar nombre
 #solicitar y validar teléfono
 def ingresar_telefono():
     while True:
-        tel = input("Teléfono (9 dígitos): ").strip()
-        if tel.isdigit() and len(tel) == 9:
-            return tel
+        telefono = input("Teléfono (9 dígitos): ").strip()
+        if telefono.isdigit() and len(telefono) == 9:
+            return telefono
         print("Ingrese exactamente 9 dígitos numéricos.")
 
 #solicitar y validar correo electrónico
@@ -42,106 +41,129 @@ def escribir_contacto(nombre, telefono, correo):
     print("\nContacto guardado correctamente.")
     print(f"Nombre   : {nombre}")
     print(f"Teléfono : {telefono}")
-    print(f"Correo   : {correo}\n")
+    print(f"Correo   : {correo}")
 
 #mostrar todos los contactos registrados
 def mostrar_contactos():
-    print("\n=== LISTA DE CONTACTOS ===\n")
+    print("\n--- lista de contactos ---")
 
     try:
         with open(ARCHIVO, "r", encoding="utf-8") as archivo:
             contador = 1
-
             for linea in archivo:
                 linea = linea.strip()
-
                 if not linea:
                     continue
-
-                linea = linea.replace("\t", "|")
                 datos = [dato.strip() for dato in linea.split("|")]
-
                 if len(datos) == 3:
                     nombre, telefono, correo = datos
-
-                    print(f"CONTACTO {contador}")
+                    print(f"\nContacto {contador}")
                     print(f"Nombre   : {nombre}")
                     print(f"Teléfono : {telefono}")
                     print(f"Correo   : {correo}")
                     print("-----------------------------")
-
                     contador += 1
                 else:
                     print(f"Línea con formato incorrecto: {linea}")
-
+            if contador == 1:
+                print("No hay contactos registrados.")
     except FileNotFoundError:
         print("El archivo aún no existe.")
 
 #contar contactos y buscar coincidencias por nombre
 def buscar_y_procesar():
-    print("\n=== BUSCAR Y CONTAR CONTACTOS ===")
-
+    print("\n--- buscar y contar contactos ---")
     try:
         with open(ARCHIVO, "r", encoding="utf-8") as archivo:
             contactos = []
-
             for linea in archivo:
                 linea = linea.strip()
-
                 if not linea:
                     continue
-
-                linea = linea.replace("\t", "|")
                 datos = [dato.strip() for dato in linea.split("|")]
-
                 if len(datos) == 3:
                     contactos.append(datos)
-
             print(f"Se han registrado un total de {len(contactos)} contactos válidos.")
-
             termino = input("Ingrese el nombre a buscar: ").strip().lower()
             encontrados = 0
-
-            for datos in contactos:
-                if termino in datos[0].lower():
+            for contacto in contactos:
+                if termino in contacto[0].lower():
                     print(
-                        f"Encontrado: {datos[0]} | Tel: {datos[1]} | Correo: {datos[2]}"
-                    )
+                        f"Encontrado: {contacto[0]} | Tel: {contacto[1]} | Correo: {contacto[2]}")
                     encontrados += 1
-
             if encontrados == 0:
                 print("No se encontraron coincidencias.")
-
     except FileNotFoundError:
         print("El archivo aún no existe.")
 
-#demostrar uso de archivos binarios con pickle
-def manejar_binario():
-    print("\n=== ARCHIVO BINARIO: INVENTARIO ===")
-    archivo_bin = "inventario_frutaxa.dat"
-    #estructura de ejemplo para almacenar
-    inventario = [
-        {"producto": "Chips de Aguaymanto", "stock": 150, "precio": 5.50},
-        {"producto": "Chips de Betarraga", "stock": 200, "precio": 4.80}]
-    print("Guardando estructura en archivo binario...")
-    with open(archivo_bin, "wb") as f:
-        pickle.dump(inventario, f)
-    print("Leyendo y recuperando desde el archivo binario...")
-    if os.path.exists(archivo_bin):
-        with open(archivo_bin, "rb") as f:
-            datos_recuperados = pickle.load(f)
-        for item in datos_recuperados:
-            print(f"- {item['producto']} | Stock: {item['stock']} | S/.{item['precio']:.2f}")
+# guardar contactos del archivo txt en un archivo binario
+def guardar_contactos_binario():
+    print("\n--- guardar contactos en binario ---")
+    contactos = []
+    try:
+        with open(ARCHIVO, "r", encoding="utf-8") as archivo:
+            for linea in archivo:
+                linea = linea.strip()
+                if not linea:
+                    continue
+                datos = [dato.strip() for dato in linea.split("|")]
+                if len(datos) == 3:
+                    contactos.append({
+                        "nombre": datos[0],
+                        "telefono": datos[1],
+                        "correo": datos[2]})
+        with open(ARCHIVO_BINARIO, "wb") as archivo_binario:
+            archivo_binario.write(str(contactos).encode("utf-8"))
+        print(f"Se guardaron {len(contactos)} contactos en {ARCHIVO_BINARIO}")
+    except FileNotFoundError:
+        print("El archivo de contactos aún no existe.")
+
+#leer contactos desde el archivo binario
+def leer_contactos_binario():
+    print("\n--- leer contactos desde binario ---")
+    try:
+        with open(ARCHIVO_BINARIO, "rb") as archivo_binario:
+            datos_binarios = archivo_binario.read()
+        datos_texto = datos_binarios.decode("utf-8")
+        contactos = eval(datos_texto)
+        if not contactos:
+            print("No hay contactos guardados en el archivo binario.")
+            return
+        for contacto in contactos:
+            print(f"Nombre   : {contacto['nombre']}")
+            print(f"Teléfono : {contacto['telefono']}")
+            print(f"Correo   : {contacto['correo']}")
+            print("-----------------------------")
+    except FileNotFoundError:
+        print("El archivo binario aún no existe.")
+
+# verificar el archivo binario generado
+def verificar_archivo_generado():
+    print("\n--- verificar archivo generado ---")
+
+    try:
+        with open(ARCHIVO_BINARIO, "rb") as archivo_binario:
+            datos = archivo_binario.read()
+
+        print("Archivo encontrado correctamente.")
+        print(f"Nombre del archivo: {ARCHIVO_BINARIO}")
+        print(f"Contenido en bytes:")
+        print(datos)
+        print("\nPuedes abrir el archivo contactos.dat con un editor externo como Bloc de notas o Visual Studio Code.")
+
+    except FileNotFoundError:
+        print("El archivo binario aún no existe. Primero debe generarlo.")
 
 #menú principal del sistema
 def menu():
     while True:
-        print("\n====== SISTEMA DE CONTACTOS ======")
         print("1. Ingresar y guardar contacto")
         print("2. Mostrar contactos")
-        print("3. Buscar y contar contactos (Paso 7)")
-        print("4. Probar archivo binario (Paso 8)")
-        print("5. Salir")
+        print("3. Buscar y contar contactos")
+        print("4. Guardar contactos en binario")
+        print("5. Leer contactos desde binario")
+        print("6. Verificar archivo generado")
+        print("7. Salir")
         opcion = input("Seleccione una opción: ")
         if opcion == "1":
             nombre, telefono, correo = ingresar_contacto()
@@ -151,12 +173,17 @@ def menu():
         elif opcion == "3":
             buscar_y_procesar()
         elif opcion == "4":
-            manejar_binario()
+            guardar_contactos_binario()
         elif opcion == "5":
-            print("Cerrando sistema... ¡Archivos liberados con éxito!")
+            leer_contactos_binario()
+        elif opcion == "6":
+            verificar_archivo_generado()
+        elif opcion == "7":
+            print("Cerrando sistema")
             break
         else:
             print("Opción inválida.")
-# punto de entrada del programa
+
+#punto de entrada del programa
 if __name__ == "__main__":
     menu()
