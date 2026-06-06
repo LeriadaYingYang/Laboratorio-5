@@ -1,7 +1,6 @@
 import pickle
 import os
 
-
 ARCHIVO = "contactos.txt"#archivo donde se almacenan los contactos
 
 def ingresar_nombre():#solicitar y validar nombre
