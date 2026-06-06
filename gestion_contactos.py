@@ -43,30 +43,28 @@ def escribir_contacto(nombre, telefono, correo):
     print(f"Teléfono : {telefono}")
     print(f"Correo   : {correo}")
 
-#mostrar todos los contactos registrados
+#mostrar todos los contactos registrados en forma de tabla
 def mostrar_contactos():
     print("\n--- lista de contactos ---")
-
     try:
         with open(ARCHIVO, "r", encoding="utf-8") as archivo:
-            contador = 1
+            contactos = []
             for linea in archivo:
                 linea = linea.strip()
                 if not linea:
                     continue
                 datos = [dato.strip() for dato in linea.split("|")]
                 if len(datos) == 3:
-                    nombre, telefono, correo = datos
-                    print(f"\nContacto {contador}")
-                    print(f"Nombre   : {nombre}")
-                    print(f"Teléfono : {telefono}")
-                    print(f"Correo   : {correo}")
-                    print("-----------------------------")
-                    contador += 1
-                else:
-                    print(f"Línea con formato incorrecto: {linea}")
-            if contador == 1:
+                    contactos.append(datos)
+            if not contactos:
                 print("No hay contactos registrados.")
+                return
+
+            print(f"{'ID':<5}{'Nombre':<25}{'Teléfono':<15}{'Correo'}")
+            print("-" * 65)
+            for i, contacto in enumerate(contactos, 1):
+                print(f"{i:<5}{contacto[0]:<25}{contacto[1]:<15}{contacto[2]}")
+
     except FileNotFoundError:
         print("El archivo aún no existe.")
 
@@ -118,7 +116,7 @@ def guardar_contactos_binario():
     except FileNotFoundError:
         print("El archivo de contactos aún no existe.")
 
-#leer contactos desde el archivo binario
+#leer contactos desde el archivo binario en forma de tabla
 def leer_contactos_binario():
     print("\n--- leer contactos desde binario ---")
     try:
@@ -129,11 +127,11 @@ def leer_contactos_binario():
         if not contactos:
             print("No hay contactos guardados en el archivo binario.")
             return
-        for contacto in contactos:
-            print(f"Nombre   : {contacto['nombre']}")
-            print(f"Teléfono : {contacto['telefono']}")
-            print(f"Correo   : {contacto['correo']}")
-            print("-----------------------------")
+        print(f"{'ID':<5}{'Nombre':<25}{'Teléfono':<15}{'Correo'}")
+        print("-" * 65)
+        for i, contacto in enumerate(contactos, 1):
+            print(
+                f"{i:<5}{contacto['nombre']:<25}{contacto['telefono']:<15}{contacto['correo']}")
     except FileNotFoundError:
         print("El archivo binario aún no existe.")
 
