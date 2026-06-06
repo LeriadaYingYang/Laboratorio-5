@@ -1,74 +1,103 @@
-ARCHIVO = "contactos.txt"
-ARCHIVO_BINARIO = "contactos.dat"
+# ==============================================================================
+# SISEstudiante: Juan Xavier Sánchez 
+# Parte 7 y 8, laboratorio 5
+# ==============================================================================
 
-# PASO 7: 
-def procesar_busqueda_conteo():
-    print("\n=== [PASO 7] PROCESAR DATOS: BÚSQUEDA Y CONTEO ===")
-    criterio = input("Ingrese el nombre (o inicial) a buscar: ").strip().lower()
-    total_registros = 0
-    coincidencias = 0
+ARCHIVO_TXT = "contactos.txt"
+ARCHIVO_DAT = "contactos.dat"
 
-    print("\n--- Resultados de la Búsqueda ---")
+# PASO 3: Funciones de entrada
+def ingresar_nombre():
+    while True:
+        nombre = input("Nombre completo: ").strip()
+        if nombre: return nombre
+        print("El nombre no puede estar vacío.")
+
+def ingresar_telefono():
+    while True:
+        tel = input("Teléfono (9 dígitos): ").strip()
+        if tel.isdigit() and len(tel) == 9: return tel
+        print("Ingrese exactamente 9 dígitos.")
+
+def ingresar_correo():
+    while True:
+        correo = input("Correo electrónico: ").strip()
+        if "@" in correo and "." in correo: return correo
+        print("Ingrese un correo válido.")
+
+# PASO 4 y 6: Escritura y adición
+def escribir_contacto():
+    nombre, tel, correo = ingresar_nombre(), ingresar_telefono(), ingresar_correo()
+    with open(ARCHIVO_TXT, "a", encoding="utf-8") as f:
+        f.write(f"{nombre} | {tel} | {correo}\n")
+    print("\n[+] Contacto registrado con éxito.")
+
+# PASO 5: Lectura línea por línea ---
+def mostrar_contactos():
+    print("\n--- LISTA DE CONTACTOS (.txt) ---")
     try:
+        with open(ARCHIVO_TXT, "r", encoding="utf-8") as f:
+            for i, linea in enumerate(f, 1):
+                print(f"{i}. {linea.strip()}")
+    except FileNotFoundError:
+        print("[!] El archivo no existe aún.")
 
-        with open(ARCHIVO, "r", encoding="utf-8") as archivo:
-            for linea in archivo:
-                linea = linea.strip()
-                if not linea:
-                    continue
-                linea = linea.replace("\t", "|")
-                datos = [dato.strip() for dato in linea.split("|")]
+# PASO 7: Procesamiento (Búsqueda y Conteo) 
+def procesar_datos():
+    criterio = input("Buscar nombre: ").strip().lower()
+    total, encontrados = 0, 0
+    try:
+        with open(ARCHIVO_TXT, "r", encoding="utf-8") as f:
+            for linea in f:
+                datos = [d.strip() for d in linea.split("|")]
                 if len(datos) == 3:
-                    total_registros += 1
-                    nombre, telefono, correo = datos
-                    if criterio in nombre.lower():
-                        print(f" -> Encontrado: {nombre} | Tel: {telefono} | Correo: {correo}")
-                        coincidencias += 1
-        print("\n--- Estadísticas del Procesamiento ---")
-        print(f" Total de contactos registrados evaluados: {total_registros}")
-        print(f" Total de coincidencias encontradas: {coincidencias}")
+                    total += 1
+                    if criterio in datos[0].lower():
+                        print(f" -> {datos[0]} | {datos[1]} | {datos[2]}")
+                        encontrados += 1
+        print(f"\nResultados: Evaluados {total}, Encontrados {encontrados}")
     except FileNotFoundError:
-        print("El archivo de texto aún no existe. No hay datos para procesar.")
+        print("[!] No hay datos para procesar.")
 
-# PASO 8:
-def guardar_estructura_binaria():
-    print("\n=== [PASO 8] GUARDANDO ESTRUCTURAS EN ARCHIVO BINARIO ===")
-    lista_estructuras = []
-    
+# PASO 8: Archivo Binario (Persistencia de estructuras)
+def guardar_binario():
+    lista = []
     try:
-        with open(ARCHIVO, "r", encoding="utf-8") as archivo:
-            for linea in archivo:
-                linea = linea.strip()
-                if not linea:
-                    continue
-                linea = linea.replace("\t", "|")
-                datos = [dato.strip() for dato in linea.split("|")]
-                
-                if len(datos) == 3:
+        with open(ARCHIVO_TXT, "r", encoding="utf-8") as f:
+            for linea in f:
+                d = [x.strip() for x in linea.split("|")]
+                if len(d) == 3:
+                    lista.append({"nom": d[0], "tel": d[1], "cor": d[2]})
+        
+        # Guardado binario nativo: convertir a string y codificar a bytes
+        with open(ARCHIVO_DAT, "wb") as f:
+            f.write(str(lista).encode('utf-8'))
+        print(f"[+] {len(lista)} registros migrados a binario.")
+    except FileNotFoundError:
+        print("[!] Error: No hay archivo TXT para migrar.")
 
-                    contacto_objeto = {
-                        "nombre": datos[0],
-                        "telefono": datos[1],
-                        "correo": datos[2]
-                    }
-                    lista_estructuras.append(contacto_objeto)
-        with open(ARCHIVO_BINARIO, "wb") as archivo_bin:
-            datos_en_texto = str(lista_estructuras)
-            datos_en_bytes = datos_en_texto.encode('utf-8')
-            archivo_bin.write(datos_en_bytes)    
-        print(f" ¡Éxito! Se han guardado {len(lista_estructuras)} estructuras en '{ARCHIVO_BINARIO}'.")
-    except FileNotFoundError:
-        print("No existe el archivo de texto para migrar a binario.")
-def recuperar_estructura_binaria():
-    print("\n=== [PASO 8] RECUPERANDO DATOS DESDE ARCHIVO BINARIO ===")
+def leer_binario():
     try:
-        with open(ARCHIVO_BINARIO, "rb") as archivo_bin:
-            datos_en_bytes = archivo_bin.read()
-            datos_en_texto = datos_en_bytes.decode('utf-8')
-            
-            contactos_recuperados = eval(datos_en_texto)
-        print("\n--- Estructuras recuperadas ---")
-        for i, contacto in enumerate(contactos_recuperados, 1):
-            print(f" Objeto [{i}] -> Nombre: {contacto['nombre']} | Teléfono: {contacto['telefono']} | Correo: {contacto['correo']}") 
+        with open(ARCHIVO_DAT, "rb") as f:
+            # Reconstrucción del objeto desde bytes
+            datos = eval(f.read().decode('utf-8'))
+            for c in datos:
+                print(f"Nombre: {c['nom']} | Tel: {c['tel']}")
     except FileNotFoundError:
-        print("El archivo binario no existe. Genérelo primero con la opción 4.")
+        print("[!] Error: No existe el archivo binario.")
+
+# MENÚ PRINCIPAL 
+def menu():
+    while True:
+        print("\n=== SISTEMA DE GESTIÓN ===")
+        print("1. Registrar | 2. Listar | 3. Buscar/Contar | 4. Migrar a DAT | 5. Leer DAT | 6. Salir")
+        op = input("Opción: ")
+        if op == "1": escribir_contacto()
+        elif op == "2": mostrar_contactos()
+        elif op == "3": procesar_datos()
+        elif op == "4": guardar_binario()
+        elif op == "5": leer_binario()
+        elif op == "6": print("Saliendo..."); break
+
+if __name__ == "__main__":
+    menu()
